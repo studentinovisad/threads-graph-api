@@ -13,6 +13,8 @@ import {
   GetConversationParams,
   GetConversationResponse,
   GetConversationResponseSchema,
+  GetLongLivedTokenResponse,
+  GetLongLivedTokenResponseSchema,
   GetMediaMetricsParams,
   GetMediaMetricsResponse,
   GetMediaMetricsResponseSchema,
@@ -147,19 +149,37 @@ export class ThreadsPublicApiClient {
     redirectUri: string,
     code: string,
   ): Promise<ExchangeAuthorizationCodeResponse> {
-    const formData = new FormData();
-    formData.append('client_id', clientId);
-    formData.append('client_secret', clientSecret);
-    formData.append('grant_type', 'authorization_code');
-    formData.append('redirect_uri', redirectUri);
-    formData.append('code', code);
 
-    const response = await fetch(this._apiUrl('/oauth/access_token'), {
-      method: 'POST',
-      body: formData,
-    });
-    const json = await response.json();
-    return ExchangeAuthorizationCodeResponseSchema.parse(json);
+    const response = await this._apiPost('/oauth/access_token', {
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+      code,
+    }, ExchangeAuthorizationCodeResponseSchema);
+    return response as ExchangeAuthorizationCodeResponse;
+  }
+
+  async getLongLivedToken(
+    clientSecret: string,
+    accessToken: string,
+  ): Promise<GetLongLivedTokenResponse> {
+    const response = await this._apiGet('/access_token', {
+      grant_type: 'th_exchange_token',
+      client_secret: clientSecret,
+      access_token: accessToken,
+    }, GetLongLivedTokenResponseSchema);
+    return response as GetLongLivedTokenResponse;
+  }
+
+  async refreshLongLivedToken(
+    accessToken: string,
+  ): Promise<GetLongLivedTokenResponse> {
+    const response = await this._apiGet('/refresh_access_token', {
+      grant_type: 'th_refresh_token',
+      access_token: accessToken,
+    }, GetLongLivedTokenResponseSchema);
+    return response as GetLongLivedTokenResponse;
   }
 }
 

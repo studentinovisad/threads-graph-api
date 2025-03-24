@@ -54,6 +54,15 @@ export type ExchangeAuthorizationCodeResponse = z.infer<
   typeof ExchangeAuthorizationCodeResponseSchema
 >;
 
+export const GetLongLivedTokenResponseSchema = z.object({
+  access_token: z.string(),
+  "token_type": z.string(),
+  "expires_in": z.number(),
+});
+export type GetLongLivedTokenResponse = z.infer<
+  typeof GetLongLivedTokenResponseSchema
+>;
+
 export type CreateMediaContainerParams = {
   replyToId?: string;
   replyControl?: 'everyone' | 'accounts_you_follow' | 'mentioned_only';
